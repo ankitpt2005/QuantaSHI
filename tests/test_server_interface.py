@@ -98,6 +98,70 @@ class TestServerInterface(unittest.TestCase):
         self.assertEqual(srv.status, ServerStatus.IDLE)
         self.assertAlmostEqual(self.vdc.get_cluster_power_w(), 145.0, places=1)
 
+    def _make_task(self, request_id, context=128, output=32):
+        return ExecutionTask(
+            request_id=request_id,
+            user_id="usr_test",
+            workload_type="TEXT_CHAT",
+            context_tokens=context,
+            max_output_tokens=output,
+            deadline_slo_ms=2000,
+            priority_level="P1_INTERACTIVE",
+            arrival_time=0.0,
+        )
+
+    def test_node_drain_lifecycle(self):
+        srv = self.vdc.servers["srv_gpu_01"]
+
+        self.assertTrue(self.vdc.dispatch_to_server("srv_gpu_01", self._make_task("req_drain_01")))
+        self.assertTrue(srv.drain())
+        self.assertEqual(srv.status, ServerStatus.DRAINING)
+
+        # New assignments are rejected while draining.
+        self.assertFalse(self.vdc.dispatch_to_server("srv_gpu_01", self._make_task("req_drain_02")))
+
+        # The in-flight task still completes.
+        completed = []
+        for _ in range(50):
+            completed.extend(self.vdc.step(dt=0.1))
+        self.assertEqual(len(completed), 1)
+        self.assertEqual(completed[0].request_id, "req_drain_01")
+
+        # Recover the drained node back to IDLE.
+        self.assertTrue(srv.recover())
+        self.assertEqual(srv.status, ServerStatus.IDLE)
+
+    def test_node_fault_injection_and_recovery(self):
+        srv = self.vdc.servers["srv_acc_02"]
+
+        self.assertTrue(self.vdc.dispatch_to_server("srv_acc_02", self._make_task("req_fault_01")))
+        self.assertTrue(srv.set_offline())
+        self.assertEqual(srv.status, ServerStatus.OFFLINE)
+        self.assertEqual(len(srv.active_streams), 0)
+        self.assertEqual(len(srv.ingress_queue), 0)
+
+        # Offline node rejects new work.
+        self.assertFalse(self.vdc.dispatch_to_server("srv_acc_02", self._make_task("req_fault_02")))
+
+        self.assertTrue(srv.recover())
+        self.assertEqual(srv.status, ServerStatus.IDLE)
+
+    def test_estimated_queue_wait_telemetry(self):
+        srv = self.vdc.servers["srv_cpu_03"]  # 4 stream slots
+
+        # Fill all 4 stream slots, then queue a 5th task.
+        for i in range(4):
+            self.vdc.dispatch_to_server("srv_cpu_03", self._make_task(f"req_q_{i}"))
+        self.vdc.dispatch_to_server("srv_cpu_03", self._make_task("req_q_queued"))
+
+        snap = srv.get_snapshot()
+        self.assertEqual(snap.queue_depth, 1)
+        self.assertGreater(snap.estimated_queue_wait_ms, 0.0)
+
+        # Idle server (empty queue) reports zero estimated wait.
+        self.vdc.reset_cluster()
+        self.assertEqual(srv.get_snapshot().estimated_queue_wait_ms, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

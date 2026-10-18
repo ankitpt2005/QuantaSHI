@@ -169,6 +169,53 @@ class ServerInstance:
 
         return completed_events
 
+    # ------------------------------------------------------------------
+    # Node lifecycle management (fault injection / graceful drain / recovery)
+    # ------------------------------------------------------------------
+    def drain(self) -> bool:
+        """Begin a graceful drain: stop accepting new tasks while in-flight
+        streams run to completion. Queued tasks are left in place for Part 3
+        to re-route. Returns False if the node is already draining or offline."""
+        if self.status in (ServerStatus.DRAINING, ServerStatus.OFFLINE):
+            return False
+        self.status = ServerStatus.DRAINING
+        return True
+
+    def set_offline(self) -> bool:
+        """Inject a hardware/network fault: the node becomes unreachable and
+        drops all in-flight and queued work. Returns False if already offline."""
+        if self.status == ServerStatus.OFFLINE:
+            return False
+        self.status = ServerStatus.OFFLINE
+        self.active_streams.clear()
+        self.ingress_queue.clear()
+        return True
+
+    def recover(self) -> bool:
+        """Recover a drained or offline node back into service (IDLE).
+        Returns False if the node is not in a recoverable state."""
+        if self.status not in (ServerStatus.DRAINING, ServerStatus.OFFLINE):
+            return False
+        self.status = ServerStatus.IDLE
+        return True
+
+    def _estimate_queue_wait_ms(self) -> float:
+        """Estimate (ms) until the next compute stream slot frees up.
+
+        When the ingress queue is non-empty, a newly queued task waits for the
+        earliest-finishing active stream. Uses each stream's remaining time
+        (estimated_duration_sec - progress_sec); returns 0.0 when idle."""
+        if not self.ingress_queue:
+            return 0.0
+        remaining = [
+            t.estimated_duration_sec - t.progress_sec
+            for t in self.active_streams
+            if t.estimated_duration_sec > 0
+        ]
+        if not remaining:
+            return 0.0
+        return round(min(remaining) * 1000.0, 2)
+
     def get_snapshot(self) -> ServerTelemetrySnapshot:
         total_slots = self.config.max_streams
         active = len(self.active_streams)
@@ -186,6 +233,7 @@ class ServerInstance:
             completed_tasks_count=self.completed_count,
             slo_violations_count=self.slo_violations,
             total_tokens_processed=self.total_tokens_processed,
+            estimated_queue_wait_ms=self._estimate_queue_wait_ms(),
         )
 
     def reset(self):
@@ -231,3 +279,15 @@ class VirtualDataCentre:
         self.clock = 0.0
         for srv in self.servers.values():
             srv.reset()
+
+    def drain_server(self, server_id: str) -> bool:
+        srv = self.servers.get(server_id)
+        return srv.drain() if srv else False
+
+    def fail_server(self, server_id: str) -> bool:
+        srv = self.servers.get(server_id)
+        return srv.set_offline() if srv else False
+
+    def recover_server(self, server_id: str) -> bool:
+        srv = self.servers.get(server_id)
+        return srv.recover() if srv else False

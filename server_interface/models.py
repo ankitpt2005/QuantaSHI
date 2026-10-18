@@ -101,3 +101,4 @@ class ServerTelemetrySnapshot:
     completed_tasks_count: int
     slo_violations_count: int
     total_tokens_processed: int
+    estimated_queue_wait_ms: float
