@@ -23,7 +23,7 @@ from system_interface.models import RoutingPolicy, OptimizationWeights
 from system_interface.scheduler import QuantaSHIScheduler
 from simulation_engine import SimulationSession
 
-PORT = int(os.environ.get("QUANTASHI_PORT", "8000"))
+PORT = int(os.environ.get("PORT", os.environ.get("QUANTASHI_PORT", "8000")))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 # Shared state for live simulator & agents
@@ -281,7 +281,7 @@ def main():
             continue
 
     if server is None:
-        print("[!] Could not bind to any port from 8000 to 8010.")
+        print(f"[!] Could not bind to any port from {port} to {port + 10}.")
         sys.exit(1)
 
     url = f"http://localhost:{port}"
