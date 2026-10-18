@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuantaSHI — Corporate AI Infrastructure & Energy Scheduling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <!-- Top Corporate Header & Run Controls -->
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ENTERPRISE INFRASTRUCTURE · ENERGY-AWARE AI INFERENCE</p>
+        <h1>QuantaSHI <span>Live Control Centre</span></h1>
+      </div>
+      <div class="run-controls">
+        <label>Scenario 
+          <select id="scenario">
+            <option value="SCENARIO_2_FLASH_BURST">Flash burst (3× peak)</option>
+            <option value="SCENARIO_1_STEADY_STATE">Steady state (15–20 req/s)</option>
+            <option value="SCENARIO_3_BIMODAL">Bimodal (Chat & RAG)</option>
+            <option value="SCENARIO_4_CONTENTION">Sustained contention</option>
+          </select>
+        </label>
+        <label>Clock Speed 
+          <select id="speed">
+            <option value="1">1×</option>
+            <option value="4" selected>4×</option>
+            <option value="8">8×</option>
+            <option value="16">16×</option>
+          </select>
+        </label>
+        <button class="primary" id="start">▶ Start Loop</button>
+        <button id="pause">⏸ Pause</button>
+        <button id="reset">↺ Reset</button>
+      </div>
+    </header>
+
+    <!-- Unified View Switcher Tabs -->
+    <nav class="view-switch" aria-label="Unified simulation views">
+      <button class="view-tab active" data-view="overview">Integrated Operations</button>
+      <button class="view-tab" data-view="users-view">👤 User Interface (Web Network)</button>
+      <button class="view-tab" data-view="servers-view">🖥️ Server Interface (2D Rack)</button>
+      <button class="view-tab" data-view="scheduler-view">⚡ System Interface (Decision Engine)</button>
+      <button class="view-tab" data-view="ai-agents-view">🤖 AI Agents</button>
+      <span style="margin-left: auto; display: flex; gap: 8px;">
+        <a href="../user_interface/web/" target="_blank" style="color: var(--blue); font-size: 11px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff;">👤 Users Web ↗</a>
+        <a href="../server_interface/web/" target="_blank" style="color: var(--green); font-size: 11px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff;">🖥️ Servers Web ↗</a>
+        <a href="../system_interface/web/" target="_blank" style="color: var(--amber); font-size: 11px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff;">⚡ System Web ↗</a>
+      </span>
+    </nav>
+
+    <!-- Synchronized Live Status Strip -->
+    <section class="status-strip">
+      <span id="run-dot" class="dot"></span>
+      <strong id="run-status">Initializing loop…</strong>
+      <span>Sim Clock: <b id="clock">—</b></span>
+      <span>Seed: <b id="seed">—</b></span>
+      <span>Trace Progress: <b id="trace">—</b></span>
+      <span class="assumption">Fan et al. power integration · 100-user constellation · 3 heterogeneous servers</span>
+    </section>
+
+    <!-- Executive KPI Metrics Strip -->
+    <section class="metrics" id="metrics" aria-label="System overview metrics"></section>
+
+    <!-- ====================================================================
+         1. INTEGRATED OPERATIONS VIEW (Side-by-side Overview)
+         ==================================================================== -->
+    <section class="view-section" id="overview-view" data-view-section="overview">
+      <!-- 2D Server Rack Quick Bar -->
+      <div class="rack-enclosure">
+        <div class="rack-header">
+          <div>
+            <p class="eyebrow">HETEROGENEOUS VIRTUAL DATA CENTRE</p>
+            <h2>2D Server Rack Overview (Server A, B, C)</h2>
+          </div>
+          <span class="panel-meta">Fan et al. Non-Linear Power Curve Integration</span>
+        </div>
+        <div class="server-grid" id="servers-overview-grid"></div>
+      </div>
+
+      <!-- Split Lower Grid: Live Event Timeline & Latest Decisions -->
+      <div class="lower-grid">
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">LIVE EVENT TIMELINE</p>
+              <h2>Synchronized Event Bus</h2>
+            </div>
+            <span class="panel-meta">Real-Time Ingress & Execution</span>
+          </div>
+          <div class="timeline" id="events"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">DECISION EXPLAINABILITY</p>
+              <h2>Latest Routing Choices</h2>
+            </div>
+            <span class="panel-meta">Exact Rationale & Pruned Alternatives</span>
+          </div>
+          <div class="decision-list" id="decisions-overview"></div>
+        </article>
+      </div>
+
+      <!-- Matched Comparison: QuantaSHI vs Round Robin -->
+      <div class="lower-grid">
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">MATCHED EXPERIMENT</p>
+              <h2>QuantaSHI vs Uniform Round Robin Baseline</h2>
+            </div>
+            <span class="panel-meta">Identical Trace & Seed</span>
+          </div>
+          <div id="comparison" class="comparison"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">REQUEST LIFECYCLE</p>
+              <h2>Latest Processed Inference Queries</h2>
+            </div>
+            <span class="panel-meta">Ingress Queue Status</span>
+          </div>
+          <div id="requests" class="request-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         2. USER INTERFACE: Web Network Node Style (Canvas Graph)
+         ==================================================================== -->
+    <section class="view-section" id="users-view" data-view-section="users-view" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">USER INTERFACE &bull; WORKLOAD GENERATOR</p>
+          <h2>100-User Constellation Web Network Graph</h2>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="primary" id="btn-fire-user-workload">⚡ Trigger Request Pulse</button>
+        </div>
+      </div>
+
+      <div class="user-network-container">
+        <!-- Canvas Graph Container -->
+        <div class="canvas-wrapper">
+          <div class="canvas-header-bar">
+            <span style="font: 700 11px 'DM Mono', monospace; color: var(--text);">
+              Top Origin Node (U-ORIGIN) &rarr; Web of 100 Virtual Users (U-10001 &hellip; U-10100) &rarr; Data Center Gateway
+            </span>
+            <div class="network-legend">
+              <span><i class="legend-dot" style="background: var(--blue);"></i> Sending</span>
+              <span><i class="legend-dot" style="background: var(--muted-light);"></i> Idle</span>
+              <span><i class="legend-dot" style="background: var(--green);"></i> Data Center Hub</span>
+            </div>
+          </div>
+          <canvas id="network-canvas"></canvas>
+        </div>
+
+        <!-- Ingress Sidebar -->
+        <aside class="user-sidebar">
+          <div class="ingress-stream-card">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">LIVE WORKLOAD INGRESS</p>
+                <h2>Emitted Prompt Payloads</h2>
+              </div>
+              <span class="panel-meta" id="ingress-counter">0 reqs</span>
+            </div>
+            <div class="ingress-list" id="user-ingress-list"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Bottom Distribution & Request Statistics -->
+      <div class="user-bottom-grid">
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">WORKLOAD MIX DISTRIBUTION</p>
+              <h2>Azure Trace Token & Query Categorization</h2>
+            </div>
+          </div>
+          <div style="padding: 16px;" id="workload-distribution-bars">
+            <div class="distribution-bar">
+              <span class="dist-label">Text Chat</span>
+              <div class="dist-track"><div class="dist-fill" style="width: 50%; background: var(--blue);"></div></div>
+              <span class="dist-val">50%</span>
+            </div>
+            <div class="distribution-bar">
+              <span class="dist-label">Code Generation</span>
+              <div class="dist-track"><div class="dist-fill" style="width: 25%; background: var(--green);"></div></div>
+              <span class="dist-val">25%</span>
+            </div>
+            <div class="distribution-bar">
+              <span class="dist-label">RAG Q&A</span>
+              <div class="dist-track"><div class="dist-fill" style="width: 15%; background: var(--amber);"></div></div>
+              <span class="dist-val">15%</span>
+            </div>
+            <div class="distribution-bar">
+              <span class="dist-label">Summarization</span>
+              <div class="dist-track"><div class="dist-fill" style="width: 10%; background: var(--muted);"></div></div>
+              <span class="dist-val">10%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">ACTIVE POPULATION TELEMETRY</p>
+              <h2>Virtual User Status Matrix</h2>
+            </div>
+            <span class="panel-meta" id="user-population-meta">100 users ready</span>
+          </div>
+          <div class="user-list" id="users" style="display: grid; grid-template-columns: repeat(4, 1fr); max-height: 240px; overflow-y: auto;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         3. SERVER INTERFACE: 2D Server Rack Visualization (Server A, B, C)
+         ==================================================================== -->
+    <section class="view-section" id="servers-view" data-view-section="servers-view" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">SERVER INTERFACE &bull; VIRTUAL DATA CENTRE</p>
+          <h2>Authoritative 2D Server Rack Enclosure</h2>
+        </div>
+        <p>Fan et al. (ISCA 2007) Non-linear Power Curve Integration &bull; 2D Hardware Racks</p>
+      </div>
+
+      <div class="rack-enclosure">
+        <div class="rack-header">
+          <div>
+            <h3 style="font-size: 15px; color: var(--text);">Equipment Chassis Rack #1 — Production Heterogeneous Pod</h3>
+            <p style="font-size: 11px; color: var(--muted); margin-top: 2px;">Calibrated Stream Limits & Execution Rates</p>
+          </div>
+          <span style="font: 700 11px 'DM Mono', monospace; color: var(--green); background: var(--green-bg); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(30, 130, 76, 0.2);">
+            ● 3 NODES ACTIVE
+          </span>
+        </div>
+
+        <!-- 3 Server Cards: Server A, B, C -->
+        <div class="server-grid" id="servers-main-grid"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         4. SYSTEM INTERFACE: Modern Minimal Decision Engine UI
+         ==================================================================== -->
+    <section class="view-section" id="scheduler-view" data-view-section="scheduler-view" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">SYSTEM INTERFACE &bull; DECISION & OPTIMIZATION ENGINE</p>
+          <h2>Real-Time Scheduling & Explainability Stream</h2>
+        </div>
+        <p>Pareto Optimization &bull; Exact HiGHS / QUBO Solvers &bull; Pruned Alternative Justification</p>
+      </div>
+
+      <div class="lower-grid">
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">DECISION EXPLAINABILITY STREAM</p>
+              <h2>Real-Time Routing Choices & Rejected Alternatives</h2>
+            </div>
+            <a href="/api/finops/audit-export?format=csv" download="quantashi_finops_audit.csv" class="button" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-weight: 600;">
+              📥 Export FinOps CSV
+            </a>
+          </div>
+          <div class="decision-list" id="decisions-main"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">BENCHMARK COMPARISON</p>
+              <h2>QuantaSHI vs Uniform Round Robin Baseline</h2>
+            </div>
+          </div>
+          <div id="comparison-sys" class="comparison"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         5. AI AGENTS VIEW
+         ==================================================================== -->
+    <section id="ai-agents-view" class="view-section" data-view-section="ai-agents-view" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">AUTONOMOUS MULTI-AGENT ARCHITECTURE</p>
+          <h2>Specialized AI Agents Across QuantaSHI Interfaces</h2>
+        </div>
+        <p>Dynamic workload synthesis &bull; Autonomous SRE telemetry diagnostics &bull; Decision & Pareto attribution</p>
+      </div>
+
+      <div class="agent-grid">
+        <!-- User Workload Agent Card -->
+        <article class="panel agent-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow" style="color: var(--blue);">USER INTERFACE</p>
+              <h2>🤖 UserWorkloadAgent</h2>
+            </div>
+            <span class="badge" style="background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(29, 112, 184, 0.3);">OpenRouter LLM</span>
+          </div>
+          <div class="agent-body">
+            <p class="agent-desc">Autonomous persona synthesis, contextual prompt generation, token requirements, and SLA deadlines replacing manual static workload samplers.</p>
+            <button class="primary" id="btn-dash-user-agent" style="width: 100%; margin: 12px 0;">✨ Synthesize AI Workload Query</button>
+            <div id="dash-user-agent-output" class="agent-output-box">
+              <span class="agent-idle-text">Click above to trigger autonomous query synthesis.</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Server Ops Agent Card -->
+        <article class="panel agent-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow" style="color: var(--green);">SERVER INTERFACE</p>
+              <h2>🩺 ServerOpsAgent</h2>
+            </div>
+            <span class="badge" style="background: var(--green-bg); color: var(--green); border: 1px solid rgba(30, 130, 76, 0.3);">Autonomous SRE</span>
+          </div>
+          <div class="agent-body">
+            <p class="agent-desc">Real-time telemetry analysis, Fan et al. power curve evaluation, queue bottleneck diagnosis, and automated SRE operational directives.</p>
+            <button class="primary" id="btn-dash-server-agent" style="width: 100%; margin: 12px 0; background: var(--green); border-color: var(--green);">🩺 Run Cluster Diagnostic</button>
+            <div id="dash-server-agent-output" class="agent-output-box">
+              <span class="agent-idle-text">Click above to run autonomous AI cluster health diagnosis.</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- System Reasoning Agent Card -->
+        <article class="panel agent-panel">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow" style="color: var(--amber);">SYSTEM INTERFACE</p>
+              <h2>🧠 SystemReasoningAgent</h2>
+            </div>
+            <span class="badge" style="background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(180, 83, 9, 0.3);">Decision Architect</span>
+          </div>
+          <div class="agent-body">
+            <p class="agent-desc">Natural language attribution explaining Pareto trade-offs (wE vs wL), verifying solver provenance, and auditing latency headroom.</p>
+            <button class="primary" id="btn-dash-system-agent" style="width: 100%; margin: 12px 0; background: var(--amber); border-color: var(--amber);">🧠 Explain Latest Decision</button>
+            <div id="dash-system-agent-output" class="agent-output-box">
+              <span class="agent-idle-text">Click above for AI attribution of the latest scheduling decision.</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <p class="footer-note" id="assumptions"></p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

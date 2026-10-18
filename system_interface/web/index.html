@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Interface — Decision & Optimization Engine (QuantaSHI)</title>
+  <meta name="description" content="QuantaSHI Part 3: System Interface and AI inference multi-objective optimization engine.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Engineering Navigation & Decision Telemetry Ribbon -->
+    <header class="top-nav">
+      <div class="brand-group">
+        <div class="brand-text">
+          <h1>System Interface &bull; Decision Engine</h1>
+          <span class="subtitle">Real-Time Pareto Multi-Objective Optimization (Energy vs. Latency SLA)</span>
+        </div>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <!-- Live System Telemetry Ribbon -->
+      <div class="kpi-ribbon">
+        <div class="kpi-card">
+          <span class="kpi-label">Dispatched Requests</span>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="sys-dispatched">0</span>
+            <span class="kpi-sub">reqs</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">Cluster Energy Saved</span>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="sys-energy-saved" style="color: #10b981;">18.5%</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">SLA Compliance</span>
+          <div class="kpi-value-row">
+            <span class="kpi-value" id="sys-slo-compliance">98.6%</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main System Interface Workspace -->
+    <div class="main-workspace">
+      <!-- Policy Controls & Architecture Area -->
+      <section class="canvas-section" style="padding: 24px; overflow-y: auto;">
+        <div class="servers-section-header" style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>QuantaSHI Optimization Engine Control Panel</h2>
+              <p>Configure dispatch policies, evaluate candidate scoring functions, and observe real-time routing</p>
+            </div>
+            <div class="toolbar-group">
+              <button id="btn-toggle-engine" class="btn btn-primary" title="Start or stop continuous engine dispatch">
+                ▶ Run Decision Engine
+              </button>
+              <button id="btn-step-single" class="btn btn-secondary" title="Dispatch single test request">
+                ⚡ Step Dispatch
+              </button>
+              <button id="btn-reset-system" class="btn btn-secondary" title="Reset system counters">
+                ↺ Reset Engine
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy Selector Card -->
+        <div style="background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <div style="flex: 1;">
+              <label style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; display: block; margin-bottom: 6px;">Active Dispatch Policy</label>
+              <select id="select-policy" style="width: 100%; background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 10px 14px; border-radius: 6px; font-size: 0.95rem; font-family: var(--font-mono); outline: none;">
+                <option value="BALANCED_PARETO">Balanced Pareto (wE = 0.50, wL = 0.50)</option>
+                <option value="ENERGY_OPTIMIZED">Energy-Optimized (wE = 0.85, wL = 0.15)</option>
+                <option value="LATENCY_FIRST">Latency-First (wE = 0.10, wL = 0.90)</option>
+                <option value="ROUND_ROBIN">Round-Robin Baseline (Uniform)</option>
+              </select>
+            </div>
+          </div>
+          <p id="policy-desc" style="font-size: 0.85rem; color: #64748b; margin-top: 10px;">
+            Balances cluster-wide power against tail latency headroom.
+          </p>
+        </div>
+
+        <!-- Heterogeneous Destination Targets Card -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <div style="background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px; padding: 16px;">
+            <h4 style="color: #38bdf8; font-size: 0.9rem; margin-bottom: 4px;">srv_gpu_01 (NVIDIA H100)</h4>
+            <p style="font-size: 0.75rem; color: #94a3b8;">High-speed accelerator for heavy RAG/Summarization or strict low-latency SLAs.</p>
+          </div>
+          <div style="background: #0f172a; border: 1px solid #10b981; border-radius: 8px; padding: 16px;">
+            <h4 style="color: #10b981; font-size: 0.9rem; margin-bottom: 4px;">srv_acc_02 (NVIDIA L4 / Telum)</h4>
+            <p style="font-size: 0.75rem; color: #94a3b8;">Energy-efficient workhorse for standard interactive chat queries.</p>
+          </div>
+          <div style="background: #0f172a; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px;">
+            <h4 style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 4px;">srv_cpu_03 (Intel Xeon)</h4>
+            <p style="font-size: 0.75rem; color: #94a3b8;">Commodity CPU fallback for non-urgent background batch requests.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: Live Routing Decisions Stream & AI Reasoning Agent -->
+      <aside class="sidebar-panel">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" id="tab-sys-decisions">Decisions Log</button>
+          <button class="sidebar-tab" id="tab-sys-agent">🤖 AI Reasoning Agent</button>
+        </div>
+        <div class="sidebar-content" id="view-sys-decisions">
+          <div class="stream-header">
+            <span>Live Dispatch Telemetry</span>
+            <span class="badge-live">● ACTIVE</span>
+          </div>
+          <div class="stream-list" id="decisions-stream">
+            <div style="font-size: 0.75rem; color: #64748b; padding: 20px; text-align: center;">
+              Incoming requests will be dispatched dynamically according to the active optimization policy.
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-content hidden" id="view-sys-agent" style="padding: 16px;">
+          <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid #a855f7; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-weight: 700; color: #a855f7; font-size: 0.85rem;">🤖 SystemReasoningAgent</span>
+              <span style="font-size: 0.7rem; background: #1e293b; color: #94a3b8; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">OpenRouter</span>
+            </div>
+            <p style="font-size: 0.75rem; color: #cbd5e1; line-height: 1.4;">
+              Autonomous decision architect evaluating Pareto trade-offs, justifying hardware selection, and verifying SLA headroom.
+            </p>
+          </div>
+
+          <button id="btn-trigger-system-agent" class="btn btn-primary" style="width: 100%; margin-bottom: 14px; justify-content: center; gap: 8px;">
+            🧠 Explain Last Decision via AI
+          </button>
+
+          <div id="system-agent-output" style="background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; font-size: 0.75rem;">
+            <div style="color: #64748b; text-align: center; padding: 10px;">Click above to request natural language AI attribution for the latest routing decision.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="system_app.js"></script>
+</body>
+</html>

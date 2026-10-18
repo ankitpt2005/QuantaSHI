@@ -1,0 +1,7 @@
+# Core numerical solver dependencies.  Verify wheel availability on the target
+# LinuxONE/s390x image before deployment; they are validated in this workspace.
+numpy>=2.0
+scipy>=1.11
+
+# Optional: only needed for the external AI-agent gateway, not for simulation.
+requests>=2.31

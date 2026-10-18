@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "title": "QuantaSHI Honest Optimization & Quantum Scaling Benchmark",
+    "timestamp": "2026-10-18 08:19:49",
+    "weights": {
+      "energy": 0.5,
+      "latency": 0.5
+    },
+    "cluster": "Heterogeneous 3-Node Cluster (H100 GPU, L4/Telum Accelerator, Xeon CPU)"
+  },
+  "experiments": [
+    {
+      "batch_size": 2,
+      "variables_qubits": 4,
+      "solver_method": "HiGHS Exact MILP",
+      "runtime_ms": 3.487,
+      "is_feasible": true,
+      "objective_value": 1.4221,
+      "total_energy_j": 1073.75
+    },
+    {
+      "batch_size": 2,
+      "variables_qubits": 4,
+      "solver_method": "Simulated Annealing",
+      "runtime_ms": 43.774,
+      "is_feasible": true,
+      "objective_value": -4.5779,
+      "total_energy_j": 1073.75
+    },
+    {
+      "batch_size": 2,
+      "variables_qubits": 4,
+      "solver_method": "QAOA Simulation (p=1)",
+      "runtime_ms": 91.816,
+      "is_feasible": true,
+      "objective_value": -4.5779,
+      "total_energy_j": 1073.75
+    },
+    {
+      "batch_size": 2,
+      "variables_qubits": 4,
+      "solver_method": "Greedy Fallback (GESF)",
+      "runtime_ms": 0.241,
+      "is_feasible": true,
+      "objective_value": 0.933,
+      "total_energy_j": 1073.75
+    },
+    {
+      "batch_size": 2,
+      "variables_qubits": 4,
+      "solver_method": "Round-Robin",
+      "runtime_ms": 0.007,
+      "is_feasible": true,
+      "objective_value": 0.0,
+      "total_energy_j": 780.52
+    },
+    {
+      "batch_size": 4,
+      "variables_qubits": 10,
+      "solver_method": "HiGHS Exact MILP",
+      "runtime_ms": 1.853,
+      "is_feasible": true,
+      "objective_value": 1.4573,
+      "total_energy_j": 4994.56
+    },
+    {
+      "batch_size": 4,
+      "variables_qubits": 10,
+      "solver_method": "Simulated Annealing",
+      "runtime_ms": 41.528,
+      "is_feasible": true,
+      "objective_value": -10.5427,
+      "total_energy_j": 4994.56
+    },
+    {
+      "batch_size": 4,
+      "variables_qubits": 10,
+      "solver_method": "QAOA Simulation (p=1)",
+      "runtime_ms": 33.625,
+      "is_feasible": true,
+      "objective_value": -5.5513,
+      "total_energy_j": 343.86
+    },
+    {
+      "batch_size": 4,
+      "variables_qubits": 10,
+      "solver_method": "Greedy Fallback (GESF)",
+      "runtime_ms": 0.258,
+      "is_feasible": true,
+      "objective_value": 3.0452,
+      "total_energy_j": 4994.56
+    },
+    {
+      "batch_size": 4,
+      "variables_qubits": 10,
+      "solver_method": "Round-Robin",
+      "runtime_ms": 0.006,
+      "is_feasible": true,
+      "objective_value": 0.0,
+      "total_energy_j": 5487.99
+    },
+    {
+      "batch_size": 6,
+      "variables_qubits": 17,
+      "solver_method": "HiGHS Exact MILP",
+      "runtime_ms": 1.682,
+      "is_feasible": true,
+      "objective_value": 2.5567,
+      "total_energy_j": 3606.83
+    },
+    {
+      "batch_size": 6,
+      "variables_qubits": 17,
+      "solver_method": "Simulated Annealing",
+      "runtime_ms": 42.601,
+      "is_feasible": true,
+      "objective_value": -15.1831,
+      "total_energy_j": 3469.26
+    },
+    {
+      "batch_size": 6,
+      "variables_qubits": 17,
+      "solver_method": "QAOA (Infeasible Qubits)",
+      "runtime_ms": Infinity,
+      "is_feasible": false,
+      "objective_value": 0.0,
+      "total_energy_j": 0.0,
+      "note": "Hilbert space 2^17 exceeds classical statevector memory limits"
+    },
+    {
+      "batch_size": 6,
+      "variables_qubits": 17,
+      "solver_method": "Greedy Fallback (GESF)",
+      "runtime_ms": 0.521,
+      "is_feasible": true,
+      "objective_value": 2.933,
+      "total_energy_j": 3606.83
+    },
+    {
+      "batch_size": 6,
+      "variables_qubits": 17,
+      "solver_method": "Round-Robin",
+      "runtime_ms": 0.008,
+      "is_feasible": true,
+      "objective_value": 0.0,
+      "total_energy_j": 5631.53
+    },
+    {
+      "batch_size": 8,
+      "variables_qubits": 22,
+      "solver_method": "HiGHS Exact MILP",
+      "runtime_ms": 2.552,
+      "is_feasible": true,
+      "objective_value": 3.6329,
+      "total_energy_j": 2377.18
+    },
+    {
+      "batch_size": 8,
+      "variables_qubits": 22,
+      "solver_method": "Simulated Annealing",
+      "runtime_ms": 56.673,
+      "is_feasible": true,
+      "objective_value": -20.1403,
+      "total_energy_j": 2273.94
+    },
+    {
+      "batch_size": 8,
+      "variables_qubits": 22,
+      "solver_method": "QAOA (Infeasible Qubits)",
+      "runtime_ms": Infinity,
+      "is_feasible": false,
+      "objective_value": 0.0,
+      "total_energy_j": 0.0,
+      "note": "Hilbert space 2^22 exceeds classical statevector memory limits"
+    },
+    {
+      "batch_size": 8,
+      "variables_qubits": 22,
+      "solver_method": "Greedy Fallback (GESF)",
+      "runtime_ms": 0.678,
+      "is_feasible": true,
+      "objective_value": 2.7401,
+      "total_energy_j": 2377.18
+    },
+    {
+      "batch_size": 8,
+      "variables_qubits": 22,
+      "solver_method": "Round-Robin",
+      "runtime_ms": 0.009,
+      "is_feasible": true,
+      "objective_value": 0.0,
+      "total_energy_j": 4846.6
+    },
+    {
+      "batch_size": 12,
+      "variables_qubits": 28,
+      "solver_method": "HiGHS Exact MILP",
+      "runtime_ms": 3.412,
+      "is_feasible": true,
+      "objective_value": 4.6011,
+      "total_energy_j": 8812.29
+    },
+    {
+      "batch_size": 12,
+      "variables_qubits": 28,
+      "solver_method": "Simulated Annealing",
+      "runtime_ms": 35.694,
+      "is_feasible": true,
+      "objective_value": -30.432,
+      "total_energy_j": 8011.05
+    },
+    {
+      "batch_size": 12,
+      "variables_qubits": 28,
+      "solver_method": "QAOA (Infeasible Qubits)",
+      "runtime_ms": Infinity,
+      "is_feasible": false,
+      "objective_value": 0.0,
+      "total_energy_j": 0.0,
+      "note": "Hilbert space 2^28 exceeds classical statevector memory limits"
+    },
+    {
+      "batch_size": 12,
+      "variables_qubits": 28,
+      "solver_method": "Greedy Fallback (GESF)",
+      "runtime_ms": 0.684,
+      "is_feasible": true,
+      "objective_value": 6.6608,
+      "total_energy_j": 8812.29
+    },
+    {
+      "batch_size": 12,
+      "variables_qubits": 28,
+      "solver_method": "Round-Robin",
+      "runtime_ms": 0.008,
+      "is_feasible": true,
+      "objective_value": 0.0,
+      "total_energy_j": 18555.07
+    }
+  ]
+}
